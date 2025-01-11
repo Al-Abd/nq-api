@@ -138,7 +138,7 @@
     },
     "/user": {
       "get": {
-        "description": "Get users list",
+        "description": "Get the list of all users",
         "security": [
           {
             "ApiKeyAuth": []
@@ -147,7 +147,53 @@
         "tags": ["user"],
         "responses": {
           "200": {
-            "description": "Return's the list of users"
+            "description": "Returns the list of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "description": "Unique identifier of the user"
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "Primary email address of the user, if available"
+                      },
+                      "username": {
+                        "type": "string",
+                        "description": "Username of the user"
+                      },
+                      "first_name": {
+                        "type": "string",
+                        "description": "First name of the user, if available"
+                      },
+                      "last_name": {
+                        "type": "string",
+                        "description": "Last name of the user, if available"
+                      },
+                      "birthday": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "Birthday of the user, if available"
+                      },
+                      "profile_image": {
+                        "type": "string",
+                        "description": "URL of the user's profile image, if available"
+                      },
+                      "language": {
+                        "type": "string",
+                        "description": "Preferred language of the user, if available"
+                      }
+                    },
+                    "required": ["uuid", "username"]
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -171,7 +217,7 @@
                     "minLength": 6,
                     "maxLength": 12
                   },
-                  "email": {
+                  "primary_email": {
                     "type": "string",
                     "format": "email",
                     "pattern": "\\.[Ii][Oo]$",
@@ -209,7 +255,15 @@
                     "minLength": 1,
                     "maxLength": 2
                   }
-                }
+                },
+                "required": [
+                  "username",
+                  "email",
+                  "first_name",
+                  "last_name",
+                  "birthday",
+                  "language"
+                ]
               }
             }
           }
@@ -300,8 +354,15 @@
                     "type": "string",
                     "description": "The url of a profile image",
                     "example": "https://assets.natiq.com/mahdi-profile-image.jpg"
+                  },
+                  "primary_email": {
+                    "type": "string",
+
+                    "description": "The primary email of the user",
+                    "example": "natiq@example.com"
                   }
-                }
+                },
+                "required": ["username", "first_name", "last_name"]
               }
             }
           }
@@ -428,7 +489,45 @@
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "Returns the list of all organizations"
+            "description": "Returns the list of all organizations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "org-username"
+                      },
+                      "primary_name": {
+                        "type": "string",
+                        "example": "Primary Organization Name"
+                      },
+                      "profile_image": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "http://example.com/image.jpg"
+                      },
+                      "established_date": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-01-01"
+                      },
+                      "national_id": {
+                        "type": "string",
+                        "example": "123456789"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -440,6 +539,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -459,8 +559,16 @@
                     "minLength": 1,
                     "maxLength": 16
                   },
+                  "primary_name": {
+                    "type": "string",
+                    "description": "The primary name for organization",
+                    "example": "github",
+                    "minLength": 1,
+                    "maxLength": 16
+                  },
                   "profile_image": {
                     "type": "string",
+                    "nullable": true,
                     "description": "The url of a profile image",
                     "example": "https://..."
                   },
@@ -476,7 +584,14 @@
                     "maxLength": 11,
                     "example": "12345678911"
                   }
-                }
+                },
+                "required": [
+                  "username",
+                  "name",
+                  "primary_name",
+                  "established_date",
+                  "national_id"
+                ]
               }
             }
           }
@@ -503,14 +618,51 @@
             "required": true,
             "name": "organization_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "The UUID of the organization to view"
             }
           }
         ],
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "Returns the organization with id you specified"
+            "description": "Returns the organization with id you specified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "username": {
+                      "type": "string",
+                      "description": "The unique username of the organization",
+                      "example": "github"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The full name of the organization",
+                      "example": "GitHub Organization"
+                    },
+                    "profile_image": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "The URL of the organization's profile image",
+                      "example": "https://assets.natiq.com/example-profile-image.jpg"
+                    },
+                    "established_date": {
+                      "type": "string",
+                      "format": "date",
+                      "description": "The established date of the organization",
+                      "example": "2008-04-10"
+                    },
+                    "national_id": {
+                      "type": "string",
+                      "description": "The national ID of the organization",
+                      "example": "12345678911"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -527,11 +679,15 @@
             "required": true,
             "name": "organization_uuid",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "uuid",
+              "example": "e0e1f46b-3b8c-4f9b-8c6f-467d31c60987"
+            },
+            "description": "The unique identifier of the organization to be edited"
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -553,11 +709,14 @@
                   },
                   "profile_image": {
                     "type": "string",
+                    "format": "url",
+                    "nullable": true,
                     "description": "The url of a profile image",
                     "example": "https://..."
                   },
                   "established_date": {
                     "type": "string",
+                    "format": "date",
                     "description": "The established date of organization(company), minYear is 200 year past",
                     "example": "1988-03-12"
                   },
@@ -568,7 +727,13 @@
                     "maxLength": 11,
                     "example": "12345678911"
                   }
-                }
+                },
+                "required": [
+                  "username",
+                  "name",
+                  "established_date",
+                  "national_id"
+                ]
               }
             }
           }
@@ -591,21 +756,95 @@
           {
             "in": "path",
             "required": true,
-            "name": "account_uuid",
+            "name": "organization_uuid",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier (UUID) of the organization to be deleted"
           }
         ],
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "The organization with id you specified deleted"
+            "description": "Mushaf deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Deleted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
           }
         }
       }
     },
     "/organization/name": {
+      "get": {
+        "description": "Returns the list of organization names for the specified organization UUID",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": ["organization"],
+        "responses": {
+          "200": {
+            "description": "Returns the list of organization names for the specified UUID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "The organization name",
+                        "example": "Example Organization"
+                      },
+                      "language": {
+                        "type": "string",
+                        "description": "Language of the organization name",
+                        "example": "en"
+                      },
+                      "uuid": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUID of the name entry",
+                        "example": "123e4567-e89b-12d3-a456-426614174001"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "description": "Add the organization name in another language",
         "security": [
@@ -614,6 +853,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -621,19 +861,20 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "New name",
+                    "description": "The new name of the organization",
                     "example": "ali",
                     "minLength": 1,
                     "maxLength": 16
                   },
                   "language": {
                     "type": "string",
-                    "description": "Language",
+                    "description": "The language code for the name (2 characters, e.g., 'en' or 'ar')",
                     "minLength": 2,
                     "maxLength": 2,
                     "example": "en"
                   }
-                }
+                },
+                "required": ["name", "language"]
               }
             }
           }
@@ -641,7 +882,20 @@
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "Organization name in another language added"
+            "description": "The organization name in another language has been successfully added",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Edited"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -660,14 +914,40 @@
             "required": true,
             "name": "name_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "Returns the organization name in another language with id you specified"
+            "description": "Returns the organization name in another language with the specified ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The organization name",
+                      "example": "Example Organization"
+                    },
+                    "language": {
+                      "type": "string",
+                      "description": "Language of the organization name",
+                      "example": "en"
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "UUID of the organization name entry",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -684,11 +964,13 @@
             "required": true,
             "name": "name_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -701,7 +983,8 @@
                     "minLength": 1,
                     "maxLength": 16
                   }
-                }
+                },
+                "required": ["name"]
               }
             }
           }
@@ -709,7 +992,20 @@
         "tags": ["organization"],
         "responses": {
           "200": {
-            "description": "The organization name in another language with id you specified edited"
+            "description": "The organization name in another language with the specified ID has been edited successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Edited"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -734,13 +1030,24 @@
         "responses": {
           "200": {
             "description": "The organization name in another language with id you specified deleted"
+          },
+          "404": {
+            "description": "Organization not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
           }
         }
       }
     },
     "/permission": {
       "get": {
-        "description": "Ruturn the list of all permissions",
+        "description": "Return the list of all permissions",
         "security": [
           {
             "ApiKeyAuth": []
@@ -749,7 +1056,31 @@
         "tags": ["permission"],
         "responses": {
           "200": {
-            "description": "Returns the list of all permissions"
+            "description": "Returns the list of all permissions",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "uuid": "c7a4c02c-fdf7-4f66-90cf-5fd417fc7bcf",
+                    "account": {
+                      "uuid": "3b28d18b-13a9-46d6-b4c9-b3452b7280db",
+                      "username": "admin",
+                      "first_name": "Admin",
+                      "last_name": "User"
+                    },
+                    "object": "resource",
+                    "action": "delete",
+                    "conditions": [
+                      {
+                        "id": 1,
+                        "name": "time_based",
+                        "value": "true"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
           }
         }
       },
@@ -769,25 +1100,51 @@
                   "subject": {
                     "type": "string",
                     "description": "The user uuid or * for all users",
-                    "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
+                    "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1",
+                    "nullable": true
                   },
                   "object": {
                     "type": "string",
-                    "description": "The controller that the user need to access",
-                    "example": "Translation, Reciters & etc"
+                    "description": "The controller that the user needs to access",
+                    "example": "Translation, Reciters & etc",
+                    "nullable": false
                   },
                   "action": {
                     "type": "string",
                     "description": "The action for controller & etc",
-                    "example": "Add, Edit, View, List, Delete & etc"
+                    "example": "Add, Edit, View, List, Delete & etc",
+                    "nullable": false
                   },
                   "conditions": {
-                    "items": {},
                     "type": "array",
-                    "description": "Array of conditions, each condition is an object has name & value, currently only possible condition is isOwner(Boolean)",
-                    "example": "[{ \"name\": \"isOwner\", \"value\":\"true\"]"
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "Unique ID of the condition. Nullable or auto-generated.",
+                          "nullable": true
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Condition name (e.g., isOwner)",
+                          "example": "isOwner",
+                          "nullable": false
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Condition value (e.g., true)",
+                          "example": "true",
+                          "nullable": false
+                        }
+                      },
+                      "required": ["name", "value"]
+                    },
+                    "description": "Array of conditions, each condition is an object with a name & value. Currently, only the condition 'isOwner' is possible.",
+                    "example": "[{ \"name\": \"isOwner\", \"value\": \"true\" }]"
                   }
-                }
+                },
+                "required": ["object", "action", "conditions"]
               }
             }
           }
@@ -795,14 +1152,32 @@
         "tags": ["permission"],
         "responses": {
           "200": {
-            "description": "This means new permission created"
+            "description": "Permission successfully edited",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Added"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       }
     },
     "/permission/{permission_uuid}": {
       "get": {
-        "description": "View permission with id you specified",
+        "description": "View permission with the ID you specified",
         "security": [
           {
             "ApiKeyAuth": []
@@ -814,14 +1189,90 @@
             "required": true,
             "name": "permission_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "The unique UUID of the permission you want to view",
+              "example": "4454f3fc-acf5-4933-ac14-1ce0b055b523"
             }
           }
         ],
         "tags": ["permission"],
         "responses": {
           "200": {
-            "description": "Returns the permission with id you specified"
+            "description": "Returns the permission with the ID you specified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "description": "Unique UUID of the permission",
+                      "example": "4454f3fc-acf5-4933-ac14-1ce0b055b523"
+                    },
+                    "account": {
+                      "type": "object",
+                      "properties": {
+                        "uuid": {
+                          "type": "string",
+                          "description": "UUID of the account",
+                          "example": "456lj070-21ac-0d3j-0000-ac0s3n47ed08"
+                        },
+                        "username": {
+                          "type": "string",
+                          "description": "Username of the account",
+                          "example": "curator"
+                        },
+                        "first_name": {
+                          "type": "string",
+                          "description": "First name of the account holder",
+                          "nullable": true,
+                          "example": null
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "description": "Last name of the account holder",
+                          "nullable": true,
+                          "example": null
+                        }
+                      },
+                      "required": ["uuid", "username"]
+                    },
+                    "object": {
+                      "type": "string",
+                      "description": "The object that the permission applies to",
+                      "example": "permission"
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "The action allowed on the object",
+                      "example": "create"
+                    },
+                    "conditions": {
+                      "type": "array",
+                      "description": "Array of conditions associated with the permission",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "description": "Condition name",
+                            "example": "isOwner"
+                          },
+                          "value": {
+                            "type": "string",
+                            "description": "Condition value",
+                            "example": "true"
+                          }
+                        },
+                        "required": ["name", "value"]
+                      },
+                      "example": []
+                    }
+                  },
+                  "required": ["uuid", "account", "object", "action"]
+                }
+              }
+            }
           }
         }
       },
@@ -838,7 +1289,8 @@
             "required": true,
             "name": "permission_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -847,27 +1299,47 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["subject", "object", "action"],
                 "properties": {
                   "subject": {
                     "type": "string",
+                    "format": "uuid",
                     "description": "The user uuid or * for all users",
                     "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "object": {
                     "type": "string",
                     "description": "The controller that the user need to access",
-                    "example": "Translation, Reciters & etc"
+                    "example": "Translation"
                   },
                   "action": {
                     "type": "string",
-                    "description": "The action for controller & etc",
-                    "example": "Add, Edit, View, List, Delete & etc"
+                    "description": "The action for controller",
+                    "example": "Edit"
                   },
                   "conditions": {
-                    "items": {},
                     "type": "array",
-                    "description": "Array of conditions, each condition is an object includ has name & value, currently only possible condition is isOwner(Boolean)",
-                    "example": "[{ \"name\": \"isOwner\", \"value\":\"true\"]"
+                    "description": "Array of conditions",
+                    "items": {
+                      "type": "object",
+                      "required": ["name", "value"],
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Name of the condition"
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Value of the condition"
+                        }
+                      }
+                    },
+                    "example": [
+                      {
+                        "name": "isOwner",
+                        "value": "true"
+                      }
+                    ]
                   }
                 }
               }
@@ -877,7 +1349,36 @@
         "tags": ["permission"],
         "responses": {
           "200": {
-            "description": "Permission with id you specified edited"
+            "description": "Permission successfully edited",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Edited"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The permission with the given UUID was not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       },
@@ -901,66 +1402,138 @@
         "tags": ["permission"],
         "responses": {
           "200": {
-            "description": "Permission with id you specified deleted"
+            "description": "permission with id you specified deleted",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Deleted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The permission with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       }
     },
     "/mushaf": {
       "get": {
+        "summary": "Get the list of mushaf",
         "description": "Returns the list of mushafs",
         "parameters": [
           {
             "in": "query",
             "required": false,
             "name": "sort",
+            "description": "Field to sort the results by",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": ["name", "createTime", "updateTime"]
             }
           },
-
           {
             "in": "query",
             "required": false,
             "name": "order",
+            "description": "Order of the results. 'asc' for ascending and 'desc' for descending.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "enum": ["asc", "desc"]
             }
           },
-
           {
             "in": "query",
             "required": false,
             "name": "from",
+            "description": "The starting index of the mushafs list",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int64"
             }
           },
-
           {
             "in": "query",
             "required": false,
             "name": "to",
+            "description": "The ending index of the mushafs list",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "tags": ["quran", "general"],
         "responses": {
           "200": {
-            "description": "Returns the mushafs list"
+            "description": "Returns the mushafs list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "description": "UUID of the mushaf"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Full name of the mushaf"
+                      },
+                      "short_name": {
+                        "type": "string",
+                        "description": "Short name of the mushaf"
+                      },
+                      "source": {
+                        "type": "string",
+                        "description": "Source of the mushaf"
+                      }
+                    }
+                  }
+                },
+                "example": [
+                  {
+                    "uuid": "ccbd8806-53e8-4658-8281-3aed10b50898",
+                    "short_name": "hafs",
+                    "name": "Hafs an Asem",
+                    "source": "tanzil"
+                  }
+                ]
+              }
+            }
           }
         }
       },
       "post": {
-        "description": "Add the new mushaf",
+        "description": "Add a new mushaf",
         "security": [
           {
             "ApiKeyAuth": []
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -968,23 +1541,18 @@
                 "properties": {
                   "short_name": {
                     "type": "string",
-                    "description": "The mushaf short name, Must be one word with only '_' and {'1'..'9'}",
+                    "description": "The mushaf short name, must be one word with only '_' and {'1'..'9'}.",
                     "example": "hafs"
                   },
                   "name": {
                     "type": "string",
-                    "description": "The mushaf full name",
-                    "example": "hafs from asem"
+                    "description": "The full name of the mushaf.",
+                    "example": "Hafs an Asem"
                   },
                   "source": {
                     "type": "string",
-                    "description": "The mushaf text source",
+                    "description": "The source of the mushaf's text.",
                     "example": "tanzil"
-                  },
-                  "bismillah_text": {
-                    "type": "string",
-                    "description": "The mushaf bismillah text",
-                    "example": "بسم الله الرحمن الرحيم"
                   }
                 }
               }
@@ -994,33 +1562,86 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "This means new mushaf created"
+            "description": "The new mushaf has been created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Added"
+                }
+              }
+            }
           }
         }
       }
     },
     "/mushaf/{mushaf_uuid}": {
       "get": {
-        "description": "View mushaf with id you specified",
+        "description": "View mushaf with the id you specified",
         "parameters": [
           {
             "in": "path",
             "required": true,
             "name": "mushaf_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the mushaf to view",
+              "example": "ccbd8806-53e8-4658-2381-3aed10b50898"
             }
           }
         ],
         "tags": ["quran", "general"],
         "responses": {
           "200": {
-            "description": "Returns the mushaf with id you specified"
+            "description": "Returns the mushaf with the id you specified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "uuid": {
+                      "type": "string",
+                      "description": "UUID of the mushaf"
+                    },
+                    "short_name": {
+                      "type": "string",
+                      "description": "Short name of the mushaf"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Full name of the mushaf"
+                    },
+                    "source": {
+                      "type": "string",
+                      "description": "Source of the mushaf"
+                    }
+                  }
+                },
+                "example": {
+                  "uuid": "ccbd8806-53e8-4658-8281-3aed10b50898",
+                  "short_name": "hafs",
+                  "name": "Hafs an Asem",
+                  "source": "tanzil"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mushaf not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "description": "Edit mushaf with id you specified",
+        "description": "Edit mushaf with the UUID you specified",
         "security": [
           {
             "ApiKeyAuth": []
@@ -1031,12 +1652,16 @@
             "in": "path",
             "required": true,
             "name": "mushaf_uuid",
+            "description": "The UUID of the mushaf to edit",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "example": "ccbd8806-53e8-4658-8281-3aed10b50898"
             }
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1044,25 +1669,21 @@
                 "properties": {
                   "short_name": {
                     "type": "string",
-                    "description": "The mushaf short name, Must be one word with only '_' and {'1'..'9'}",
+                    "description": "The mushaf short name, must be one word with only '_' and {'1'..'9'}.",
                     "example": "hafs"
                   },
                   "name": {
                     "type": "string",
-                    "description": "The mushaf full name",
-                    "example": "hafs as asem"
+                    "description": "The full name of the mushaf.",
+                    "example": "Hafs an Asem"
                   },
                   "source": {
                     "type": "string",
-                    "description": "The mushaf text source",
+                    "description": "The source of the mushaf's text.",
                     "example": "tanzil"
-                  },
-                  "bismillah_text": {
-                    "type": "string",
-                    "description": "The mushaf bismillah text",
-                    "example": "بسم الله الرحمن الرحيم"
                   }
-                }
+                },
+                "required": ["short_name", "name", "source"]
               }
             }
           }
@@ -1070,12 +1691,20 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Mushaf with id you specified edited"
+            "description": "Mushaf with the UUID you specified has been edited successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Edited"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
-        "description": "Delete mushaf with id you specified",
+        "description": "Delete a mushaf by the specified UUID",
         "security": [
           {
             "ApiKeyAuth": []
@@ -1086,82 +1715,181 @@
             "in": "path",
             "required": true,
             "name": "mushaf_uuid",
+            "description": "The UUID of the mushaf to delete",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "example": "ccbd8806-53e8-4658-8281-3aed10b50898"
             }
           }
         ],
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Mushaf with id you specified deleted"
+            "description": "Mushaf deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Deleted"
+                }
+              }
+            }
           }
         }
       }
     },
     "/surah": {
       "get": {
-        "description": "Returns the list of surahs",
+        "summary": "Get the list of surahs",
+        "description": "This endpoint returns a list of surahs based on the provided query parameters.",
         "parameters": [
           {
+            "name": "mushaf",
             "in": "query",
             "required": true,
-            "name": "mushaf",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "default": "hafs"
+            },
+            "description": "The mushaf name to filter the surahs."
           },
           {
+            "name": "lang_code",
             "in": "query",
             "required": false,
+            "schema": {
+              "type": "string",
+              "example": "en"
+            },
+            "description": "The language code for surah translations."
+          },
+          {
             "name": "sort",
-            "schema": {
-              "type": "string"
-            }
-          },
-
-          {
             "in": "query",
             "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["name", "number", "createTime", "updateTime"]
+            },
+            "description": "Sorting criteria for the surah list."
+          },
+          {
             "name": "order",
-            "schema": {
-              "type": "string"
-            }
-          },
-
-          {
             "in": "query",
             "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            },
+            "description": "Sort order (ascending or descending)."
+          },
+          {
             "name": "from",
-            "schema": {
-              "type": "number"
-            }
-          },
-
-          {
             "in": "query",
             "required": false,
-            "name": "to",
             "schema": {
-              "type": "number"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Start index for pagination."
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "End index for pagination."
           }
         ],
         "tags": ["quran", "general"],
         "responses": {
           "200": {
-            "description": "Returns the surahs list"
+            "description": "Successful response containing a list of surahs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uuid": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Unique identifier for the surah."
+                      },
+                      "number": {
+                        "type": "integer",
+                        "description": "Surah number."
+                      },
+                      "period": {
+                        "type": "string",
+                        "description": "The period of revelation (e.g., Makki or Madani)."
+                      },
+                      "number_of_ayahs": {
+                        "type": "integer",
+                        "description": "The number of ayahs in the surah."
+                      },
+                      "names": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "arabic": {
+                              "type": "string",
+                              "description": "The Arabic name of the surah."
+                            },
+                            "pronunciation": {
+                              "type": "string",
+                              "description": "The way in which a word is pronounced.."
+                            },
+                            "translation_phrase": {
+                              "type": "string",
+                              "description": "A phrase that translates the meaning of the surah."
+                            },
+                            "translation": {
+                              "type": "string",
+                              "description": "Translation of the surah name."
+                            },
+                            "transliteration": {
+                              "type": "string",
+                              "description": "Transliteration of the surah name."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Surah not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "description": "Add the new surah",
+        "description": "Add a new surah to the database.",
         "security": [
           {
             "ApiKeyAuth": []
           }
         ],
         "requestBody": {
+          "required": true,
+          "description": "Details required to add the surah",
           "content": {
             "application/json": {
               "schema": {
@@ -1169,35 +1897,51 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The surah name",
+                    "description": "The surah name.",
                     "example": "الفاتحة"
                   },
                   "period": {
                     "type": "string",
-                    "description": "Surah is makki or madani",
+                    "description": "Indicates whether the surah is Makki or Madani.",
                     "example": "makki"
                   },
                   "number": {
                     "type": "number",
-                    "description": "Number of surah",
+                    "description": "The number of the surah in the Mushaf.",
                     "example": 1
                   },
                   "mushaf_id": {
                     "type": "string",
-                    "description": "The mushaf_uuid",
+                    "description": "The UUID of the Mushaf in which the surah belongs.",
                     "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "bismillah_status": {
                     "type": "boolean",
-                    "description": "Determines if bismillah exists in surah",
-                    "example": "true"
+                    "description": "Determines whether Bismillah exists in the surah.",
+                    "example": true
                   },
                   "bismillah_as_first_ayah": {
                     "type": "boolean",
-                    "description": "Determines if bismillah exists and its in the first_ayah content",
-                    "example": "false"
+                    "description": "Determines if Bismillah is the first ayah of the surah.",
+                    "example": false
+                  },
+                  "name_translation_phrase": {
+                    "type": "string",
+                    "description": "The translation phrase for the surah name in the desired language.",
+                    "example": "Al-Fatiha"
+                  },
+                  "name_pronunciation": {
+                    "type": "string",
+                    "description": "The pronunciation of the surah name in Arabic.",
+                    "example": "Al-Fatiha"
+                  },
+                  "name_transliteration": {
+                    "type": "string",
+                    "description": "The transliteration of the surah name from Arabic to Latin.",
+                    "example": "Al-Fatiha"
                   }
-                }
+                },
+                "required": ["name", "period", "number", "mushaf_id"]
               }
             }
           }
@@ -1205,7 +1949,14 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "This means new surah added"
+            "description": "The surah has been successfully added to the database.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Added"
+                }
+              }
+            }
           }
         }
       }
@@ -1219,19 +1970,224 @@
             "required": true,
             "name": "surah_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "UUID of the surah"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["text", "word"],
+              "description": "Specifies the format of the response. Options are 'text' or 'word'"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lang_code",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Language code for the translation. Defaults to 'en' if not provided"
             }
           }
         ],
         "tags": ["quran", "general"],
         "responses": {
           "200": {
-            "description": "Returns the single surah"
+            "description": "Returns the single surah",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "surah": {
+                      "type": "object",
+                      "properties": {
+                        "uuid": {
+                          "type": "string",
+                          "description": "UUID of the surah"
+                        },
+                        "mushaf": {
+                          "type": "object",
+                          "properties": {
+                            "uuid": {
+                              "type": "string",
+                              "description": "UUID of the mushaf"
+                            },
+                            "short_name": {
+                              "type": "string",
+                              "description": "Short name of the mushaf"
+                            },
+                            "name": {
+                              "type": "string",
+                              "description": "Full name of the mushaf"
+                            },
+                            "source": {
+                              "type": "string",
+                              "description": "Source of the mushaf"
+                            }
+                          }
+                        },
+                        "names": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "arabic": {
+                                "type": "string",
+                                "description": "Arabic name of the surah"
+                              },
+                              "translation": {
+                                "type": "string",
+                                "description": "Translation of the surah name"
+                              },
+                              "translation_phrase": {
+                                "type": "string",
+                                "description": "Translation phrase for the surah name"
+                              },
+                              "pronunciation": {
+                                "type": "string",
+                                "description": "Pronunciation of the surah name"
+                              },
+                              "transliteration": {
+                                "type": "string",
+                                "description": "Transliteration of the surah name"
+                              }
+                            }
+                          }
+                        },
+                        "period": {
+                          "type": "string",
+                          "description": "Period of the surah (e.g., Makki or Madani)"
+                        },
+                        "number": {
+                          "type": "integer",
+                          "description": "Surah number"
+                        },
+                        "bismillah_status": {
+                          "type": "boolean",
+                          "description": "Indicates if the surah contains 'Bismillah'"
+                        },
+                        "bismillah_as_first_ayah": {
+                          "type": "boolean",
+                          "description": "Indicates if 'Bismillah' is the first ayah of the surah"
+                        },
+                        "bismillah_text": {
+                          "type": "string",
+                          "description": "Text of 'Bismillah' if it is the first ayah"
+                        },
+                        "number_of_ayahs": {
+                          "type": "integer",
+                          "description": "Number of ayahs in the surah"
+                        }
+                      }
+                    },
+                    "ayahs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "number": {
+                            "type": "integer",
+                            "description": "Ayah number in the surah"
+                          },
+                          "uuid": {
+                            "type": "string",
+                            "description": "UUID of the ayah"
+                          },
+                          "sajdah": {
+                            "type": "boolean",
+                            "description": "Indicates if the ayah has sajdah"
+                          },
+                          "text": {
+                            "type": "string",
+                            "description": "Text of the ayah (if format is 'text')"
+                          },
+                          "words": {
+                            "type": "array",
+                            "items": {
+                              "type": "string",
+                              "description": "Words of the ayah (if format is 'word')"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "surah": {
+                    "uuid": "ccbd8806-53e8-4658-8281-3aed10b50898",
+                    "mushaf": {
+                      "uuid": "f9339c7a-749a-408e-a03e-a22cd87fe3a1",
+                      "short_name": "hafs",
+                      "name": "Hafs an Asem",
+                      "source": "tanzil"
+                    },
+                    "names": [
+                      {
+                        "arabic": "الفاتحة",
+                        "translation": "The Opening",
+                        "translation_phrase": "Al-Fatiha",
+                        "pronunciation": "Al-Fatiha",
+                        "transliteration": "Al-Fātiḥa"
+                      }
+                    ],
+                    "period": "Makki",
+                    "number": 1,
+                    "bismillah_status": true,
+                    "bismillah_as_first_ayah": true,
+                    "bismillah_text": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+                    "number_of_ayahs": 7
+                  },
+                  "ayahs": [
+                    {
+                      "number": 1,
+                      "uuid": "a2b23cd4-6f0f-4ecb-b9e0-abe34d928f12",
+                      "sajdah": false,
+                      "text": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+                      "words": [
+                        "بِسْمِ",
+                        "اللَّهِ",
+                        "الرَّحْمَنِ",
+                        "الرَّحِيمِ"
+                      ]
+                    },
+                    {
+                      "number": 2,
+                      "uuid": "b4c3d5f4-36a8-4e99-aab9-7dba0de3e351",
+                      "sajdah": false,
+                      "text": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+                      "words": [
+                        "الْحَمْدُ",
+                        "لِلَّهِ",
+                        "رَبِّ",
+                        "الْعَالَمِينَ"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Surah not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "not found!."
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "description": "Edit surah with id you specified",
+        "description": "Edit surah with the specified UUID.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -1243,11 +2199,15 @@
             "required": true,
             "name": "surah_uuid",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "UUID of the surah to edit."
           }
         ],
         "requestBody": {
+          "required": true,
+          "description": "Details required to update the surah",
           "content": {
             "application/json": {
               "schema": {
@@ -1255,35 +2215,58 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The surah name",
+                    "description": "The surah name in Arabic.",
                     "example": "الفاتحة"
+                  },
+                  "name_pronunciation": {
+                    "type": "string",
+                    "description": "Optional pronunciation of the surah name.",
+                    "example": "Al-Fatiha"
+                  },
+                  "name_translation_phrase": {
+                    "type": "string",
+                    "description": "Optional translation phrase of the surah name.",
+                    "example": "The Opening"
+                  },
+                  "name_transliteration": {
+                    "type": "string",
+                    "description": "Optional transliteration of the surah name.",
+                    "example": "Al-Fātiḥah"
                   },
                   "period": {
                     "type": "string",
-                    "description": "Surah is makki or madani",
-                    "example": "makki"
+                    "description": "Indicates whether the surah is Makki or Madani.",
+                    "example": "makki | madani"
                   },
                   "number": {
-                    "type": "number",
-                    "description": "Number of surah",
+                    "type": "integer",
+                    "description": "The surah number.",
                     "example": 1
-                  },
-                  "mushaf_id": {
-                    "type": "string",
-                    "description": "The mushaf_uuid",
-                    "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "bismillah_status": {
                     "type": "boolean",
-                    "description": "Determines if bismillah exists in surah",
-                    "example": "true"
+                    "description": "Determines if Bismillah is present in the surah.",
+                    "example": true
                   },
                   "bismillah_as_first_ayah": {
                     "type": "boolean",
-                    "description": "Determines if bismillah exists and its in the first_ayah content",
-                    "example": "false"
+                    "description": "Indicates if Bismillah is treated as the first ayah.",
+                    "example": false
+                  },
+                  "mushaf_uuid": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The UUID of the Mushaf associated with the surah.",
+                    "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   }
-                }
+                },
+                "required": [
+                  "name",
+                  "number",
+                  "bismillah_status",
+                  "bismillah_as_first_ayah",
+                  "mushaf_uuid"
+                ]
               }
             }
           }
@@ -1291,12 +2274,52 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "This means the surah edited"
+            "description": "Surah edited successfully.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Edited"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mushaf not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred during the operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error_name": {
+                      "type": "string",
+                      "description": "A unique identifier for the error type.",
+                      "example": "INTERNAL_ERROR"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Detailed error message.",
+                      "example": "Internal Error!"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "delete": {
-        "description": "Delete surah with id you specified",
+        "description": "Deletes the surah identified by the specified UUID.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -1308,14 +2331,16 @@
             "required": true,
             "name": "surah_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the surah to be deleted."
             }
           }
         ],
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Surah with id you specified deleted"
+            "description": "The surah identified by the UUID has been successfully deleted."
           }
         }
       }
@@ -1329,14 +2354,89 @@
             "required": true,
             "name": "mushaf",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "hafs"
+            }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "format",
+            "description": "The format of the ayahs.",
+            "schema": {
+              "type": "string",
+              "enum": ["text", "word"]
+            }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "sort",
+            "description": "Sort the list by the specified field.",
+            "schema": {
+              "type": "string",
+              "enum": ["number", "createTime", "updateTime"]
+            }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "order",
+            "description": "Order of the sorting.",
+            "schema": {
+              "type": "string",
+              "enum": ["asc", "desc"]
+            }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "from",
+            "description": "Starting point of the list (pagination).",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "in": "query",
+            "required": false,
+            "name": "to",
+            "description": "Ending point of the list (pagination).",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Returns the ayahs list"
+            "description": "Returns the ayahs list",
+            "content": {
+              "application/json": {
+                "example": [
+                  {
+                    "number": 1,
+                    "uuid": "123e4567-e89b-12d3-a456-426614174000",
+                    "sajdah": null,
+                    "text": "In the name of Allah, the Most Gracious, the Most Merciful.",
+                    "words": ["In", "the", "name", "of", "Allah", "..."]
+                  }
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "Ayah not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "NOT_FOUND",
+                  "message": "Not found!."
+                }
+              }
+            }
           }
         }
       },
@@ -1348,14 +2448,15 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "surah_id": {
+                  "surah_uuid": {
                     "type": "string",
-                    "description": "The surah_uuid",
+                    "description": "The UUID of the target surah",
                     "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "sajdeh": {
@@ -1363,12 +2464,13 @@
                     "description": "Ayah have sajdeh or no",
                     "example": "vajib | mustahab | null"
                   },
-                  "ayah_number": {
-                    "type": "number",
-                    "description": "Number of ayah",
-                    "example": 1
+                  "text": {
+                    "type": "string",
+                    "description": "The text of the ayah.",
+                    "example": "In the name of Allah, the Most Gracious, the Most Merciful."
                   }
-                }
+                },
+                "required": ["surah_uuid", "text"]
               }
             }
           }
@@ -1397,7 +2499,33 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Returns the single ayah"
+            "description": "Returns the single ayah",
+            "content": {
+              "application/json": {
+                "example": {
+                  "uuid": "ae819d56-5071-4ca1-b964-9e170fac1118",
+                  "mushaf": "uuid-of-mushaf",
+                  "surah": "uuid-of-surah",
+                  "ayah_number": 1,
+                  "sajdah": null,
+                  "text": "هُدًى وَبُشْرَىٰ لِلْمُؤْمِنِينَ",
+                  "words": [
+                    {
+                      "uuid": "5743e20c-ed23-443c-be2d-7ee41fa1032e",
+                      "word": "هُدًى"
+                    },
+                    {
+                      "uuid": "e3d68b7c-ef58-4598-9c4a-c96fdfe8f7b4",
+                      "word": "وَبُشْرَىٰ"
+                    },
+                    {
+                      "uuid": "b1088c7c-8eae-42a7-9741-5c37b3d11526",
+                      "word": "لِلْمُؤْمِنِينَ"
+                    }
+                  ]
+                }
+              }
+            }
           }
         }
       },
@@ -1414,30 +2542,27 @@
             "required": true,
             "name": "ayah_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "The unique identifier for the ayah"
             }
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
                 "properties": {
-                  "surah_id": {
-                    "type": "string",
-                    "description": "The surah_uuid",
-                    "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
+                  "ayah_number": {
+                    "type": "integer",
+                    "description": "Number of ayah",
+                    "example": 1
                   },
                   "sajdeh": {
                     "type": "string",
                     "description": "Ayah have sajdeh or no",
                     "example": "vajib | mustahab | null"
-                  },
-                  "ayah_number": {
-                    "type": "number",
-                    "description": "Number of ayah",
-                    "example": 1
                   }
                 }
               }
@@ -1478,13 +2603,14 @@
     },
     "/word": {
       "post": {
-        "description": "Add the new word",
+        "description": "Add a new Quran word.",
         "security": [
           {
             "ApiKeyAuth": []
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -1492,15 +2618,16 @@
                 "properties": {
                   "ayah_uuid": {
                     "type": "string",
-                    "description": "The ayah_uuid",
+                    "description": "UUID of the ayah to which the word belongs.",
                     "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "word": {
                     "type": "string",
-                    "description": "The word text",
+                    "description": "The word text to be added.",
                     "example": "الیوم"
                   }
-                }
+                },
+                "required": ["ayah_uuid", "word"]
               }
             }
           }
@@ -1508,7 +2635,36 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "This means new word added"
+            "description": "The new word has been successfully added.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "added"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The ayah with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       }
@@ -1516,20 +2672,53 @@
     "/word/{word_uuid}": {
       "description": "Returns the single word",
       "get": {
+        "description": "Returns the single word.",
         "parameters": [
           {
             "in": "path",
             "required": true,
             "name": "word_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "UUID of the word to retrieve."
             }
           }
         ],
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Returns the single word"
+            "description": "The word was successfully retrieved.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "uuid": "3ecb2468-4c4e-4adb-b172-064b9eb65ad0",
+                  "creator_user_id": 1,
+                  "word": "ٱلْحَمْدُ"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The word with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       },
@@ -1546,7 +2735,8 @@
             "required": true,
             "name": "word_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "UUID of the word to edit"
             }
           }
         ],
@@ -1558,13 +2748,13 @@
                 "properties": {
                   "ayah_uuid": {
                     "type": "string",
-                    "description": "The ayah_uuid",
+                    "description": "The ayah_uuid of the word",
                     "example": "f9339c7a-749a-408e-a03e-a22cd87fe3a1"
                   },
                   "word": {
                     "type": "string",
                     "description": "New word that want to replace",
-                    "example": ""
+                    "example": "الْحَمْدُ"
                   }
                 }
               }
@@ -1574,7 +2764,36 @@
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "This means the word edited"
+            "description": "This means the word was successfully edited",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Edited"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The word with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       },
@@ -1591,14 +2810,44 @@
             "required": true,
             "name": "word_uuid",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "UUID of the word to delete"
             }
           }
         ],
         "tags": ["quran"],
         "responses": {
           "200": {
-            "description": "Word with id you specified deleted"
+            "description": "Word with id you specified deleted",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Deleted"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The word with the given UUID was not found.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "NOT_FOUND",
+                  "message": "Not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error_name": "INTERNAL_ERROR",
+                  "message": "Internal Error!"
+                }
+              }
+            }
           }
         }
       }
@@ -1612,7 +2861,8 @@
             "required": true,
             "name": "mushaf",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "hafs"
             }
           },
 
@@ -1648,7 +2898,8 @@
             "required": false,
             "name": "from",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int64"
             }
           },
 
@@ -1779,10 +3030,10 @@
                     "description": "Release day of the translation",
                     "example": "2023-01-01"
                   },
-                  "completed": {
-                    "type": "boolean",
-                    "description": "If the translation is completed",
-                    "example": "true"
+                  "bismillah": {
+                    "type": "string",
+                    "description": "The translation bismillah text",
+                    "example": "بسم الله الرحمن الرحيم"
                   }
                 }
               }
@@ -1938,7 +3189,29 @@
         "tags": ["phrase"],
         "responses": {
           "200": {
-            "description": "return the list of all phrase"
+            "description": "Return the list of all phrases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string",
+                        "description": "The language code",
+                        "example": "en"
+                      },
+                      "status": {
+                        "type": "string",
+                        "description": "The status of the language phrases",
+                        "example": "complete"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -1958,10 +3231,11 @@
                 "properties": {
                   "phrase": {
                     "type": "string",
-                    "description": "The Quran phrase",
+                    "description": "A unique phrase from the Quran to be added to the database.",
                     "example": "كتب"
                   }
-                }
+                },
+                "required": ["phrase"]
               }
             }
           }
@@ -1975,7 +3249,7 @@
     },
     "/phrase/{language}": {
       "get": {
-        "description": "Edit phrase eith id you specified",
+        "description": "Returns a list of phrases and their translations for the specified language code. If a translation is not available for a phrase, it will be returned as null.",
         "security": [
           {
             "ApiKeyAuth": []
@@ -1985,7 +3259,75 @@
           {
             "in": "path",
             "required": true,
-            "name": "phrase_lang",
+            "name": "language",
+            "schema": {
+              "type": "string",
+              "example": "en"
+            },
+            "description": "The language code (e.g., 'en' for English, 'ar' for Arabic)."
+          }
+        ],
+        "tags": ["phrase"],
+        "responses": {
+          "200": {
+            "description": "Return's list of phrases related to language"
+          }
+        }
+      },
+      "post": {
+        "description": "Edit or add phrases and their translations for the specified language.",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "language",
+            "schema": {
+              "type": "string"
+            },
+            "description": "The language code (e.g., 'en' for English, 'ar' for Arabic)."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "ٱلصَّلَوٰةَ": "The prayer",
+                "ٱللَّهَ": "God"
+              }
+            }
+          },
+          "description": "A JSON object containing phrases as keys and their translations as values."
+        },
+        "tags": ["phrase"],
+        "responses": {
+          "200": {
+            "description": "Phrases edited or added successfully"
+          }
+        }
+      },
+      "delete": {
+        "description": "Delete all phrases related to the specified language code",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "required": true,
+            "name": "language",
             "schema": {
               "type": "string"
             }
@@ -1994,31 +3336,7 @@
         "tags": ["phrase"],
         "responses": {
           "200": {
-            "description": "Return the phrase with id you specified"
-          }
-        },
-        "post": {
-          "description": "Edit phrase whit id you specified",
-          "security": [
-            {
-              "ApiKeyAuth": []
-            }
-          ],
-          "parameters": [
-            {
-              "in": "path",
-              "required": true,
-              "name": "phrase_lang",
-              "schema": {
-                "type": "string"
-              }
-            }
-          ],
-          "tags": ["phrase"],
-          "responses": {
-            "200": {
-              "description": "phrase whit id you specified edited/added"
-            }
+            "description": "All phrases related to the language code have been deleted"
           }
         }
       }
@@ -2055,7 +3373,8 @@
             "required": false,
             "name": "from",
             "schema": {
-              "type": "number"
+              "type": "integer",
+              "format": "int64"
             }
           },
 
